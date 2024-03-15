@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace COD4_Server_Browser
 {
-    public partial class MainForm : MaterialSkin.Controls.MaterialForm
+    public partial class MainForm : Form
     {
         private readonly byte[] request = { 0xff, 0xff, 0xff, 0xff, 0x67, 0x65, 0x74, 0x73,
                                     0x65, 0x72, 0x76, 0x65, 0x72, 0x73, 0x20, 0x32,
@@ -21,12 +22,23 @@ namespace COD4_Server_Browser
                                     0x20, 0x78, 0x78, 0x78 };
 
         private readonly Image image;
+        private Dictionary<string, Image> mapImages;
+
+        object LOCK = new object();
+        private readonly List<ServerInfo> serverInfos;
 
         public MainForm()
         {
             InitializeComponent();
 
+            serverInfos = new List<ServerInfo>();
             image = Image.FromFile(@"Image1.png");
+            mapImages = new Dictionary<string, Image>();
+            var files = Directory.GetFiles(@"maps\");
+            for (int i = 0; i < files.Length; i++)
+            {
+                mapImages.Add(Path.GetFileNameWithoutExtension(files[i]), Image.FromFile(files[i]));
+            }
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
@@ -45,7 +57,6 @@ namespace COD4_Server_Browser
         void Listen(BinaryReader br)
         {
             List<byte> data = new List<byte>();
-            List<ServerInfo> serverInfos = new List<ServerInfo>();
             byte[] dem = { 0x5c, 0x00, 0x00, 0x00, 0x00 };
             while (true)
             {
@@ -82,12 +93,24 @@ namespace COD4_Server_Browser
                                         IPEndPoint ipep = new IPEndPoint(IPAddress.Parse(ip), port);
                                         var recv = client.Receive(ref ipep);
                                         //var ascii = Encoding.ASCII.GetString(recv);
-                                        
-                                        Invoke((MethodInvoker)delegate
+                                        string mapName = GetServerDetails(1, recv);
+                                        string serverName = GetServerDetails(0, recv);
+
+                                        lock (LOCK)
                                         {
-                                            exListBox1.Items.Add(
-                                                new exListBoxItem(0, GetServerName(recv), "Map Name", image));
-                                        });
+                                            Invoke((MethodInvoker)delegate
+                                            {
+                                                exListBox1.Items.Add(
+                                                    new exListBoxItem(0, serverName, mapName + $" {ip}:{port.ToString()}",
+                                                    GetMapImage(mapName)));
+                                                serverInfos.Add(new ServerInfo
+                                                {
+                                                    ServerName = serverName,
+                                                    IP = ip,
+                                                    Port = port
+                                                });
+                                            });
+                                        }
                                     }
                                     catch (Exception ex)
                                     {
@@ -112,14 +135,46 @@ namespace COD4_Server_Browser
         {
         }
 
-        private string GetServerName(byte[] bytes)
+        private Image GetMapImage(string map)
         {
+            if (mapImages.ContainsKey(map))
+                return mapImages[map];
+            else
+                return image;
+        }
+
+        private string GetServerDetails(int start, byte[] bytes)
+        {
+            List<int> list = new List<int>();
+            list.Add(6);
             for (int i = 6; i < bytes.Length; i++)
+                if (bytes[i] == 0) list.Add(i + 1);
+
+            Debug.WriteLine("");
+
+            for (int i = list[start]; i < bytes.Length; i++)
             {
                 if (bytes[i] == 0)
-                    return Encoding.ASCII.GetString(bytes.ToList().GetRange(6, i).ToArray());
+                    return Encoding.ASCII.GetString(bytes.ToList().GetRange(list[start], i - list[start]).ToArray());
             }
             return "";
+        }
+
+        private void btnSetPath_Click(object sender, EventArgs e)
+        {
+            var result = ofd.ShowDialog(this);
+            if (result == DialogResult.OK)
+            {
+
+            }
+        }
+
+        private void btnLaunch_Click(object sender, EventArgs e)
+        {
+            var proc = new Process();
+            proc.StartInfo.FileName = ofd.FileName;
+            proc.StartInfo.Arguments = $"+connect {serverInfos[exListBox1.SelectedIndex].IP}:{serverInfos[exListBox1.SelectedIndex].Port}";
+            proc.Start();   
         }
     }
 
