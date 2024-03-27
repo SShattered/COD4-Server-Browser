@@ -90,14 +90,11 @@ namespace COD4_Server_Browser
 
             // put some focus rectangle
             e.DrawFocusRectangle();
-
         }
-
     }
 
     public partial class exListBox : ListBox
     {
-
         private Size _imageSize;
         private StringFormat _fmt;
         private Font _titleFont;
@@ -119,7 +116,6 @@ namespace COD4_Server_Browser
 
         public exListBox()
         {
-            //InitializeComponent();
             _imageSize = new Size(80, 60);
             this.ItemHeight = _imageSize.Height + this.Margin.Vertical;
             _fmt = new StringFormat();
@@ -127,7 +123,6 @@ namespace COD4_Server_Browser
             _fmt.LineAlignment = StringAlignment.Near;
             _titleFont = new Font(this.Font, FontStyle.Bold);
             _detailsFont = new Font(this.Font, FontStyle.Regular);
-
         }
 
 
