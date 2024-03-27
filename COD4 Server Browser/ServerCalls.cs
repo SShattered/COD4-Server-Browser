@@ -38,9 +38,9 @@ namespace COD4_Server_Browser
         {
             get
             {
-                if( _instance == null )
+                if (_instance == null)
                     _instance = new ServerCalls();
-                return _instance; 
+                return _instance;
             }
         }
 
@@ -107,7 +107,7 @@ namespace COD4_Server_Browser
         {
             var servers = new List<ServerInfo>();
             var taskList = new List<Task>();
-            foreach(var record in keyValues)
+            foreach (var record in keyValues)
             {
                 var task = Task.Factory.StartNew(() =>
                 {
@@ -132,10 +132,9 @@ namespace COD4_Server_Browser
                     }
                     catch (Exception ex)
                     {
-                        /*if (ex is TimeoutException)
-                            WriteText("Server Timeout");*/
+                        WriteLog(ex.Message);
                     }
-                }, TaskCreationOptions.LongRunning);
+                }, TaskCreationOptions.None);
                 taskList.Add(task);
             }
             await Task.WhenAll(taskList);
@@ -164,6 +163,23 @@ namespace COD4_Server_Browser
                     return Encoding.ASCII.GetString(bytes.ToList().GetRange(list[start], i - list[start]).ToArray());
             }
             return "";
+        }
+
+        private static object _LOCK = new object();
+        private static void WriteLog(string msg)
+        {
+            try
+            {
+                lock (_LOCK)
+                {
+                    File.AppendAllText(@"log.txt", msg);
+                }
+            }
+            catch (Exception ex)
+            {
+                //Probably never going to happend xD
+                File.AppendAllText(@"log2.txt", ex.Message);
+            }
         }
     }
 }

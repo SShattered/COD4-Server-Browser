@@ -22,7 +22,7 @@ namespace COD4_Server_Browser
             InitializeComponent();
 
             serverInfos = new List<ServerInfo>();
-            image = Image.FromFile(@"Image1.png");
+            image = Image.FromFile(@"noimg.png");
             mapImages = new Dictionary<string, Image>();
             var files = Directory.GetFiles(@"maps\");
             for (int i = 0; i < files.Length; i++)
@@ -33,12 +33,15 @@ namespace COD4_Server_Browser
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
+            exListBox1.Items.Clear();
+            progressBar1.Value = 50; progressBar1.Style = ProgressBarStyle.Marquee;
             Task.Run(() =>
             {
                 var result = ServerCalls.GetAllServerDetails();
                 result.Wait();
                 Invoke(delegate ()
                 {
+                    progressBar1.Value = 100; progressBar1.Style = ProgressBarStyle.Blocks;
                     for(int i = 0; i < result.Result.Count; i++)
                     {
                         var item = result.Result[i];
@@ -69,7 +72,7 @@ namespace COD4_Server_Browser
             var result = ofd.ShowDialog(this);
             if (result == DialogResult.OK)
             {
-
+                
             }
         }
 

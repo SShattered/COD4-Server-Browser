@@ -33,6 +33,7 @@
             btnSetPath = new Button();
             ofd = new OpenFileDialog();
             btnLaunch = new Button();
+            progressBar1 = new ProgressBar();
             SuspendLayout();
             // 
             // btnRefresh
@@ -80,11 +81,21 @@
             btnLaunch.UseVisualStyleBackColor = true;
             btnLaunch.Click += btnLaunch_Click;
             // 
+            // progressBar1
+            // 
+            progressBar1.Location = new Point(87, 367);
+            progressBar1.MarqueeAnimationSpeed = 20;
+            progressBar1.Name = "progressBar1";
+            progressBar1.Size = new Size(100, 11);
+            progressBar1.Step = 5;
+            progressBar1.TabIndex = 5;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(586, 387);
+            ClientSize = new Size(586, 390);
+            Controls.Add(progressBar1);
             Controls.Add(btnLaunch);
             Controls.Add(btnSetPath);
             Controls.Add(exListBox1);
@@ -104,5 +115,6 @@
         private Button btnSetPath;
         private OpenFileDialog ofd;
         private Button btnLaunch;
+        private ProgressBar progressBar1;
     }
 }
