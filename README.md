@@ -17,3 +17,6 @@ Using C# and Winforms, an external server browser for COD4.
 
 ![image](https://github.com/SShattered/COD4-Server-Browser/assets/4478457/2ed70063-4a78-4fb4-9d92-bc9cd55824bf)
 
+## How to build
+* Clone and use Visual Studio to build.
+* Or you can download from releases
